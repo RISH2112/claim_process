@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  db:
+    container_name: claims-postgres
+    image: postgres:14.5
+    environment:
+      POSTGRES_USER: claims
+      POSTGRES_PASSWORD: claims
+      POSTGRES_DB: claimsDB
+    ports:
+      - "5432:5432"
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "1200:1200"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 1200 --access-log
+    depends_on:
+      - db
+
+  redis:
+    container_name: claims-redis
+    image: redis:6.2.3
+    ports:
+      - "6379:6379"
