@@ -2,6 +2,8 @@ version: '3.8'
 
 services:
   db:
+    networks:
+      - dbapp
     container_name: claims-postgres
     image: postgres:14.5
     environment:
@@ -11,7 +13,19 @@ services:
     ports:
       - "5432:5432"
 
+  redis:
+    networks:
+      - dbapp
+    container_name: claims-redis
+    image: redis:6.2.3
+    ports:
+      - "6380:6379"
+    depends_on:
+      - db
+
   web:
+    networks:
+      - dbapp
     build:
       context: .
       dockerfile: Dockerfile
@@ -20,9 +34,7 @@ services:
     command: uvicorn app.main:app --host 0.0.0.0 --port 1200 --access-log
     depends_on:
       - db
+      - redis
 
-  redis:
-    container_name: claims-redis
-    image: redis:6.2.3
-    ports:
-      - "6379:6379"
+networks:
+  dbapp: {}
